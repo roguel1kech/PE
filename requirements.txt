@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pydantic
+pytest
+transformers
+torch
+opencv-python
+Pillow
+requests
+langchain
+langchain-community
+langfuse
+python-dotenv
+pandas
+scikit-learn
+numpy
