@@ -1,5 +1,7 @@
 # agent/agent.py
 
+from app.observability.langfuse_client import langfuse  # noqa: F401
+
 from langfuse import observe
 from app.models.llm_client import generate_llm
 

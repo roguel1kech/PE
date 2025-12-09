@@ -5,6 +5,8 @@ from .heuristics import popular_items, category_based_recent
 from .metrics import precision_at_k, recall_at_k
 from .llm_recommender import llm_rerank
 
+from app.observability.langfuse_client import langfuse
+
 
 def main():
     items = get_items_df()
@@ -50,6 +52,12 @@ def main():
     print("Реренжированные LLM:", rec_llm)
     print("Precision@5:", precision_at_k(rec_llm, relevant, k=5))
     print("Recall@5:", recall_at_k(rec_llm, relevant, k=5))
+
+    try:
+        langfuse.flush()
+        print("\n✓ Данные отправлены в Langfuse")
+    except Exception as e:
+        print(f"\n⚠ Ошибка при отправке данных в Langfuse: {e}")
 
 if __name__ == "__main__":
     main()
