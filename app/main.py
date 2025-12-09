@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from models.sentiment_model import sentiment_analyzer
+from .models.sentiment_model import sentiment_analyzer
 
 app = FastAPI(title="Sentiment Analysis API")
 

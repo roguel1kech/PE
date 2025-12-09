@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from models.llm_client import generate_llm
+from .models.llm_client import generate_llm
 
 app = FastAPI(title="LLM API")
 

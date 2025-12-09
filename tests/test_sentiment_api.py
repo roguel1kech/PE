@@ -3,7 +3,15 @@ from app.main import app
 
 client = TestClient(app)
 
-def test_sentiment_api():
-    response = client.post("/predict", json={"text": "я счастлив"})
-    assert response.status_code == 200
-    assert "label" in response.json()
+def test_predict_ok():
+    resp = client.post("/predict", json={"text": "я счастлив"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "label" in data
+    assert "score" in data
+
+def test_predict_empty():
+    resp = client.post("/predict", json={"text": ""})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "label" in data
