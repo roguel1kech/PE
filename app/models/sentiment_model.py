@@ -47,4 +47,5 @@ class SentimentAnalyzer:
         return {"label": label, "score": score, "raw": probs.tolist()}
 
 
+# удобный синглтон
 sentiment_analyzer = SentimentAnalyzer()

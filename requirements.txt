@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+pytest
+transformers
+torch
+opencv-python
+Pillow
+requests
+langchain
+langchain-community
