@@ -1,18 +1,18 @@
 # agent/agent.py
 
+from langfuse import observe
 from app.models.llm_client import generate_llm
 
 
+@observe(name="agent_process")
 def agent_process(text: str) -> str:
     """
     Простой ИИ-агент на основе локальной LLM через Ollama.
 
     Делает 3 шага:
     1. Определяет тональность текста.
-    2. Делает краткую выжимку.
-    3. Предлагает ответ пользователю.
-
-    Возвращает строку с ответом модели.
+    2. Делает краткое резюме.
+    3. Формирует ответ пользователю от лица компании.
     """
     prompt = f"""
 Ты — интеллектуальный ассистент по работе с пользователями.
@@ -34,10 +34,8 @@ def agent_process(text: str) -> str:
     if isinstance(data, dict):
         if data.get("response"):
             return data["response"]
-        # если ошибка — вернём текст ошибки, чтобы не было пустой строки
         if data.get("error"):
-            return f"LLM error: {data['error']}"
+            return f"LLM error in agent: {data['error']}"
         return str(data)
 
     return str(data)
-

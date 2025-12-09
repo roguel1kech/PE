@@ -1,19 +1,23 @@
 # app/models/llm_client.py
 
 import requests
+from typing import Dict, Any
+
+from langfuse import observe
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "phi3:instruct"  # убедись, что такая модель есть в `ollama list`
+MODEL_NAME = "phi3:instruct"
 
 
-def generate_llm(prompt: str):
+@observe(name="ollama_generate", as_type="generation")
+def generate_llm(prompt: str) -> Dict[str, Any]:
     """
     Вызывает локальную LLM через Ollama.
-    Делает запрос к /api/generate и возвращает словарь.
-
-    Если Ollama отвечает ошибкой (502/500/404/и т.п.),
-    мы НЕ бросаем исключение, а возвращаем JSON с описанием ошибки.
-    Это важно для стабильной работы API и тестов.
+    Декорирован @observe, поэтому:
+    - Langfuse сам логирует вход (prompt),
+    - выход (response),
+    - время выполнения,
+    - ошибку (если будет).
     """
     payload = {
         "model": MODEL_NAME,
@@ -24,34 +28,36 @@ def generate_llm(prompt: str):
     try:
         response = requests.post(OLLAMA_URL, json=payload, timeout=120)
     except Exception as e:
-        # Ошибка сети / соединения — возвращаем описательный ответ
         return {
             "response": "",
-            "error": f"Request error: {e}",
+            "raw": None,
             "ok": False,
+            "error": f"Request error: {e}",
         }
 
-    # Не используем response.raise_for_status(), чтобы не падать по HTTPError
     if response.status_code != 200:
         return {
             "response": "",
-            "error": f"LLM HTTP {response.status_code}: {response.text}",
+            "raw": None,
             "ok": False,
+            "error": f"LLM HTTP {response.status_code}: {response.text}",
         }
 
-    # Нормальный кейс: 200 OK
     try:
         data = response.json()
     except Exception as e:
         return {
             "response": "",
-            "error": f"JSON parse error: {e}",
+            "raw": None,
             "ok": False,
+            "error": f"JSON parse error: {e}",
         }
 
-    # У Ollama обычно есть поле "response" с текстом ответа
+    text = data.get("response", "")
+
     return {
-        "response": data.get("response", ""),
+        "response": text,
         "raw": data,
         "ok": True,
+        "error": None,
     }

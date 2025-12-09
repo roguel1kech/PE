@@ -9,3 +9,8 @@ Pillow
 requests
 langchain
 langchain-community
+langfuse
+python-dotenv
+pandas
+scikit-learn
+numpy
