@@ -1,11 +1,23 @@
+import requests
+
 from .data import get_items_df, get_interactions_df
 from .content_based import ContentBasedRecommender
 from .collaborative import ItemBasedCollaborativeRecommender
 from .heuristics import popular_items, category_based_recent
 from .metrics import precision_at_k, recall_at_k
-from .llm_recommender import llm_rerank
+from .llm_recommender import llm_rerank, PROMPT_VARIANT
 
 from app.observability.langfuse_client import langfuse
+
+OLLAMA_URL = "http://127.0.0.1:11434/api/tags"  # лёгкий запрос для проверки
+
+
+def _ollama_available() -> bool:
+    try:
+        r = requests.get(OLLAMA_URL, timeout=2)
+        return r.status_code == 200
+    except Exception:
+        return False
 
 
 def main():
@@ -46,6 +58,10 @@ def main():
     print("Recall@5:", recall_at_k(rec_cat, relevant, k=5))
 
     print("\n=== LLM-based rerank (кандидаты = популярные) ===")
+    print(f"(вариант промпта: {PROMPT_VARIANT}; для варианта 2: LLM_PROMPT_VARIANT=2)")
+    if not _ollama_available():
+        print("Подсказка: Ollama не запущен. Реренк будет использовать порядок кандидатов без LLM.")
+        print("  Запустите в отдельном терминале: ollama serve   затем: ollama run phi3:instruct")
     base_candidates = popular_items(top_k=5)
     rec_llm = llm_rerank(user_id, base_candidates, top_k=5)
     print("Кандидаты (популярные):", base_candidates)
@@ -55,6 +71,8 @@ def main():
 
     try:
         langfuse.flush()
+        if hasattr(langfuse, "shutdown"):
+            langfuse.shutdown()  # ждём завершения отправки, иначе процесс выйдет до ответа сервера → connection error
         print("\n✓ Данные отправлены в Langfuse")
     except Exception as e:
         print(f"\n⚠ Ошибка при отправке данных в Langfuse: {e}")

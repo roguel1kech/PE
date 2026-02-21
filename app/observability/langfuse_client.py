@@ -13,7 +13,9 @@ else:
 
 PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
 SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
-BASE_URL = os.getenv("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
+BASE_URL = os.getenv("LANGFUSE_BASE_URL")
+# Таймаут
+REQUEST_TIMEOUT = int(os.getenv("LANGFUSE_REQUEST_TIMEOUT", "30"))
 
 if PUBLIC_KEY:
     os.environ["LANGFUSE_PUBLIC_KEY"] = PUBLIC_KEY
@@ -28,4 +30,5 @@ langfuse = Langfuse(
     public_key=PUBLIC_KEY,
     secret_key=SECRET_KEY,
     base_url=BASE_URL,
+    timeout=REQUEST_TIMEOUT,
 )
